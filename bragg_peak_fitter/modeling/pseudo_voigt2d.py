@@ -128,6 +128,7 @@ class PseudoVoigt2DFitter:
         model.params.update(params)
         model_eval = model(Y, X)
 
+        # Mitigate the influence of a pixel with a larger value in the residual...
         weights = 1.0/np.sqrt(data + 1)
 
         return (model_eval - data) * weights
