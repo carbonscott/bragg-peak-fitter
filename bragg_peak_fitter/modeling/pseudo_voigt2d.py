@@ -134,12 +134,12 @@ class PseudoVoigt2DFitter:
         return (model_eval - data) * weights
 
 
-    def fit(self, data, **kwargs):
+    def fit(self, data, max_nfev = None, **kwargs):
         method = self.fitting_method
         res    = lmfit.minimize(self._residual,
                                 self.params,
                                 method     = method,
-                                max_nfev   = 2000,
+                                max_nfev   = max_nfev,
                                 nan_policy = 'omit',
                                 args       = (data, ),
                                 **kwargs)

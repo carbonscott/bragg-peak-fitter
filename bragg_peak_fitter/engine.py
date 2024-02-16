@@ -10,11 +10,11 @@ from .modeling.pseudo_voigt2d import PseudoVoigt2DFitter
 
 
 class PeakFitter:
-    def __init__(self, num_cpus = 10):
-        self.num_cpus = num_cpus
+    def __init__(self):
+        pass
 
 
-    def fit_all_images(self, image_list):
+    def fit_all_images(self, image_list, num_cpus = 1, max_nfev = 2000):
         # Shutdown ray clients during a Ctrl+C event...
         def signal_handler(sig, frame):
             if ray.is_initialized():
@@ -30,7 +30,7 @@ class PeakFitter:
         if USES_MULTI_NODES:
             ray.init(address = 'auto')
         else:
-            ray.init(num_cpus = self.num_cpus)
+            ray.init(num_cpus = num_cpus)
 
         def initial_guess_for_peak(peak_image):
             # Estimate centroid (cy, cx)
@@ -70,15 +70,15 @@ class PeakFitter:
                 'c'      : c
             }
 
-        def perform_fitting(image, initial_params):
+        def perform_fitting(image, initial_params, max_nfev = 2000):
             residual = PseudoVoigt2DFitter(initial_params)
-            result = residual.fit(image)
+            result = residual.fit(image, max_nfev = max_nfev)
             return result
 
         @ray.remote
         def fit_single_image(image):
             initial_params = initial_guess_for_peak(image)
-            return perform_fitting(image, initial_params)
+            return perform_fitting(image, initial_params, max_nfev = max_nfev)
 
         futures = [fit_single_image.remote(image) for image in image_list]
         results = ray.get(futures)
