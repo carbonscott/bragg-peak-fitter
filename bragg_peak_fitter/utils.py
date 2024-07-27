@@ -30,8 +30,9 @@ def get_patch_list(peaks_y, peaks_x, img, win_size, applies_norm = True, uses_pa
             img_peak = np.pad(img_peak, padding, mode='constant', constant_values=0)
 
         # ???Norm
-        img_peak = (img_peak - img_peak.mean()) / (img_peak.std() + 1e-6)
-        img_peak = img_peak - img_peak.min()  # Shift to the positive domain
+        if applies_norm:
+            img_peak = (img_peak - img_peak.mean()) / (img_peak.std() + 1e-6)
+            img_peak = img_peak - img_peak.min()  # Shift to the positive domain
 
         patch_list.append(img_peak)
 
