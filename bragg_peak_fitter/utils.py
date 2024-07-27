@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 
-def get_patch_list(peaks_y, peaks_x, img, win_size, uses_padding = False):
+def get_patch_list(peaks_y, peaks_x, img, win_size, applies_norm = True, uses_padding = False):
     patch_list = []
     for enum_peak_idx, (peak_y, peak_x) in enumerate(zip(peaks_y, peaks_x)):
         # Obtain the peak area with a certain window size...
@@ -28,6 +28,10 @@ def get_patch_list(peaks_y, peaks_x, img, win_size, uses_padding = False):
             y_pad_u =  max(y + win_size + 1 - H, 0)    # ...Upper
             padding = ((y_pad_l, y_pad_u), (x_pad_l, x_pad_u))
             img_peak = np.pad(img_peak, padding, mode='constant', constant_values=0)
+
+        # ???Norm
+        img_peak = (img_peak - img_peak.mean()) / (img_peak.std() + 1e-6)
+        img_peak = img_peak - img_peak.min()  # Shift to the positive domain
 
         patch_list.append(img_peak)
 
